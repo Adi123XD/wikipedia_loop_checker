@@ -2,10 +2,8 @@ import React, { useState } from 'react';
 import { Container, Paper, TextField, Typography } from '@mui/material';
 import Button from '@mui/material/Button';
 import axios from 'axios';
-import * as cheerio from 'cheerio';
 import Stack from '@mui/material/Stack';
 import { styled } from '@mui/material/styles';
-import { toast } from 'react-hot-toast';
 
 const Home = () => {
     const Item = styled(Paper)(({ theme }) => ({
