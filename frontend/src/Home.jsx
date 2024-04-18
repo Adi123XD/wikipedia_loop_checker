@@ -15,23 +15,12 @@ const Home = () => {
         textAlign: 'center',
         color: theme.palette.text.secondary,
     }));
-
+    const backend_url = "http://localhost:3000"
     const [url, setUrl] = useState('');
     const [count, setCount] = useState(0)
     const [path, setPath] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-
-    const extractFirstLink = (htmlContent) => {
-        const selector = cheerio.load(htmlContent);
-        // Select the first paragraph element within the specified class
-        const firstPara = selector('#mw-content-text > div.mw-parser-output > p')
-        const firstATag = firstPara.find('a').first();
-        const hrefValue = firstATag ? firstATag.attr('href') : null;
-        const baselink = url.split('/wiki/')[0];
-        // setUrl(`${baselink}${hrefValue}`)
-        return `${baselink}${hrefValue}`
-    };
     const isValidLink = (link) => {
         try {
           new URL(link);
@@ -40,61 +29,7 @@ const Home = () => {
           return false;
         }
       };
-
-    const fetchPageContent = async (url) => {
-        try {
-            const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-            const response = await axios.get(`${proxyUrl}${url}`);
-            const htmldata = response.data
-            return htmldata
-        } catch (error) {
-            console.error(error.message);
-            setError("Error fetching Page Content")
-            throw new Error('Error fetching page content.');
-        }
-    };
-
-    const checkLoop = async () => {
-        setLoading(true);
-        let count = 0
-        let pathArr = []
-        try {
-            let nextlink = url
-            while (nextlink || url) {
-                if (nextlink && nextlink.endsWith('/wiki/Philosophy')) {
-                    pathArr.push(nextlink)
-                    // console.log('Pause triggered on Philosophy link');
-                    break;
-                }
-                else if (pathArr.includes(nextlink))
-                {
-                    setError("Loop Detected")
-                    break;
-                }
-                else if (!isValidLink(nextlink))
-                {
-                    setError("Invalid Link")
-                    break;
-                }
-                count++;
-                pathArr.push(nextlink)
-                let htmlData = await fetchPageContent(nextlink);
-                nextlink = extractFirstLink(htmlData);
-                // console.log("next url is", nextlink)
-            }
-
-            setPath(pathArr)
-            setCount(count)
-            // console.log(pathArr)
-            // console.log(path)
-        } catch (error) {
-            setError(error.message);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleFormSubmit = (e) => {
+    const handleFormSubmit = async(e) => {
         e.preventDefault();
         setError(null);
         setCount(0);
@@ -107,7 +42,20 @@ const Home = () => {
             setError("Please enter a valid Wikipedia url")
         }
         else {
-            checkLoop();
+            // checkLoop();
+            setLoading(true)
+            try {
+                const response = await axios.get(`${backend_url}?url=${url}`);
+                setPath(response.data.pathArr);
+                setCount(response.data.count);
+                // Optionally display success message using toast.success()
+              } catch (error) {
+                console.error('Error fetching data:', error);
+                console.log(response.data.message)
+                setError(error.message);
+              } finally {
+                setLoading(false);
+              }
         }
     };
 
@@ -126,6 +74,7 @@ const Home = () => {
                     </form>
                     {error && <p style={{ color: 'red', marginBottom: "1rem" }} className='w-full'>{error}</p>}
                     {!loading && count > 0 && <p style={{ marginBlock: "1rem" }} className='w-full'>There are {count} links before Philisophy page</p>}
+                    {!loading && count == 0 && <p style={{ marginBlock: "1rem" }} className='w-full'>This is the Philisophy page</p>}
                     {!loading &&
                         <Stack spacing={2} sx={{ width: "100%" }}>
                             {path.map((item, index) => (
