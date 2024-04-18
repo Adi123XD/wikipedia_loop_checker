@@ -46,13 +46,14 @@ const Home = () => {
             setLoading(true)
             try {
                 const response = await axios.get(`${backend_url}?url=${url}`);
+                if (response.status === 500) {
+                    throw new Error(`Internal server error ${response.data.message}`);
+                }
                 setPath(response.data.pathArr);
                 setCount(response.data.count);
-                // Optionally display success message using toast.success()
               } catch (error) {
-                console.error('Error fetching data:', error);
-                console.log(response.data.message)
-                setError(error.message);
+                console.log(error.message)
+                setError(error.response?.data?.message||"Internal Server Error");
               } finally {
                 setLoading(false);
               }
@@ -74,7 +75,7 @@ const Home = () => {
                     </form>
                     {error && <p style={{ color: 'red', marginBottom: "1rem" }} className='w-full'>{error}</p>}
                     {!loading && count > 0 && <p style={{ marginBlock: "1rem" }} className='w-full'>There are {count} links before Philisophy page</p>}
-                    {!loading && count == 0 && <p style={{ marginBlock: "1rem" }} className='w-full'>This is the Philisophy page</p>}
+                    {/* {!loading && count == 0 && <p style={{ marginBlock: "1rem" }} className='w-full'>This is the Philisophy page</p>} */}
                     {!loading &&
                         <Stack spacing={2} sx={{ width: "100%" }}>
                             {path.map((item, index) => (

@@ -23,6 +23,7 @@ export const extractFirstLink = (htmlContent) => {
     try {
         const selector = cheerio.load(htmlContent);
         const firstPara = selector('#mw-content-text > div.mw-parser-output > p')
+        firstPara.find('sup').remove();
         const firstATag = firstPara.find('a').first();
         const hrefValue = firstATag ? firstATag.attr('href') : null;
         const baselink = process.env.BASELINK
@@ -43,7 +44,7 @@ export const checkLoop = async (url) => {
     try {
         let nextlink = url
         while (nextlink) {
-            console.log(nextlink)
+            // console.log(nextlink)
             if (nextlink && nextlink.endsWith('/wiki/Philosophy')) {
                 pathArr.push(nextlink)
                 break;
