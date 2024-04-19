@@ -4,6 +4,7 @@ import Button from '@mui/material/Button';
 import axios from 'axios';
 import Stack from '@mui/material/Stack';
 import { styled } from '@mui/material/styles';
+import toast, { Toaster } from 'react-hot-toast';
 
 const Home = () => {
     const Item = styled(Paper)(({ theme }) => ({
@@ -18,7 +19,6 @@ const Home = () => {
     const [count, setCount] = useState(0)
     const [path, setPath] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
     const isValidLink = (link) => {
         try {
           new URL(link);
@@ -29,18 +29,16 @@ const Home = () => {
       };
     const handleFormSubmit = async(e) => {
         e.preventDefault();
-        setError(null);
         setCount(0);
         setPath([]);
         if(!isValidLink(url))
         {
-            setError("Invalid Link")
+            toast.error("Invalid Link")
         }
         else if (!url.startsWith('https://en.wikipedia.org/wiki/')) {
-            setError("Please enter a valid Wikipedia url")
+            toast.error("Please enter a valid Wikipedia url");
         }
         else {
-            // checkLoop();
             setLoading(true)
             try {
                 const response = await axios.get(`${backend_url}?url=${url}`);
@@ -51,7 +49,7 @@ const Home = () => {
                 setCount(response.data.count);
               } catch (error) {
                 console.log(error.message)
-                setError(error.response?.data?.message||"Internal Server Error");
+                toast.error(error.response?.data?.message||"Internal Server Error");
               } finally {
                 setLoading(false);
               }
@@ -71,7 +69,7 @@ const Home = () => {
                             {loading ? 'Checking...' : 'Enter'}
                         </Button>
                     </form>
-                    {error && <p style={{ color: 'red', marginBottom: "1rem" }} className='w-full'>{error}</p>}
+                    <Toaster/>
                     {!loading && count > 0 && <p style={{ marginBlock: "1rem" }} className='w-full'>There are {count} links before Philisophy page</p>}
                     {/* {!loading && count == 0 && <p style={{ marginBlock: "1rem" }} className='w-full'>This is the Philisophy page</p>} */}
                     {!loading &&

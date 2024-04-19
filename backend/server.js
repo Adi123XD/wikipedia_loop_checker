@@ -6,7 +6,6 @@ const app = express()
 app.use(cors())
 const port = process.env.PORT || 3000
 const url = process.env.URL
-console.log(url)
 app.get("/", async (req, res) => {
     try {
         const url = req.query.url
